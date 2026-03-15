@@ -17,9 +17,15 @@ class Name(Field):
 
 class Phone(Field):
     def __init__(self, value):
-        if not self._validate_phone(value):
-            raise ValueError("Phone number must contain exactly 10 digits.")
-        super().__init__(value)
+        cleaned_value = re.sub(r"[\+\(\)\-\s]", "", value)
+      
+        if len(cleaned_value) == 12 and cleaned_value.startswith("380"):
+            cleaned_value = cleaned_value[2:]
+            
+        if not self._validate_phone(cleaned_value):
+            raise ValueError("Invalid phone format. Use 10 digits (e.g., 0981234567) or +380 format.")
+            
+        super().__init__(cleaned_value)
 
     def _validate_phone(self, value):
         return len(value) == 10 and value.isdigit()
@@ -42,12 +48,26 @@ class Address(Field):
 
 class Birthday(Field):
     def __init__(self, value):
-        try:
-            self.date = datetime.strptime(value, "%d.%m.%Y").date()
-            super().__init__(value)
-        except ValueError:
-            raise ValueError("Invalid date format. Use DD.MM.YYYY")
-
+        formats = ["%d.%m.%Y", "%d/%m/%Y", "%d-%m-%Y"]
+        
+        for format in formats:
+            try:
+                self.date = datetime.strptime(value, format).date()
+                
+                if self.date > datetime.today().date():
+                    raise ValueError("Birthday cannot be in the future.")
+                
+                normalized_value = self.date.strftime("%d.%m.%Y")
+                super().__init__(normalized_value)
+                return
+                
+            except ValueError as e:
+                if "future" in str(e):
+                    raise e
+                continue
+                
+        raise ValueError("Invalid date format. Use DD.MM.YYYY, DD/MM/YYYY or DD-MM-YYYY")
+    
 class Record:
     def __init__(self, name):
         self.name = Name(name)
@@ -57,7 +77,12 @@ class Record:
         self.address = None
 
     def add_phone(self, phone_number):
-        self.phones.append(Phone(phone_number))
+        new_phone = Phone(phone_number)
+        
+        if new_phone.value in [p.value for p in self.phones]:
+            raise ValueError(f"Phone number {new_phone.value} already exists for this contact.")
+            
+        self.phones.append(new_phone)
 
     def remove_phone(self, phone_number):
         self.phones = [p for p in self.phones if p.value != phone_number]

@@ -7,7 +7,7 @@ Personal Assistant CLI is a powerful, interactive command-line tool designed to 
 ### 👤 Smart Contact Management
 
 - **Hybrid Input**: Add contacts instantly or use step-by-step interactive menus for detailed records
-- **Robust Validation**: Automatic checks for phone numbers (10 digits), email formats, and dates
+- **Robust Validation**: Smart phone number normalization (automatically handles +380, spaces, brackets, and dashes), multi-format birthday support (DD.MM.YYYY, DD/MM/YYYY, DD-MM-YYYY) with future-date prevention, and strict email format checks.
 - **Rich Profiles**: Support for multiple phone numbers, physical addresses, emails, and birthdays per contact
 - **Birthday Tracking**: A dedicated system to monitor upcoming birthdays within a custom range
 
@@ -70,7 +70,7 @@ The project follows a modular architecture for high maintainability:
 
 | Command | Description |
 |---------|-------------|
-| `add-contact <name>` | Create a new contact via interactive menu |
+| `add-contact <name> [phone]` | Create a contact quickly, or just pass a name to open the interactive menu. |
 | `show-contact <name>` | Display all details for a specific contact |
 | `all-contacts` | View a formatted table of all contacts |
 | `show-birthdays [days]` | List contacts with upcoming birthdays |
