@@ -15,7 +15,7 @@ class Note:
             self.tags.append(tag)
 
     def remove_tag(self, tag: str) -> None:
-        """Видаляє тег з нотатки. Викидає ValueError, якщо тег не знайдено."""
+        """Видаляє тег з нотатки."""
         if tag in self.tags:
             self.tags.remove(tag)
         else:
@@ -28,11 +28,18 @@ class Note:
 
 
 class NoteBook(UserDict):
-    """Клас для управління списком нотаток. Зберігає нотатки у вигляді {note_id: Note}."""
+    """Клас для управління списком нотаток."""
 
     def __init__(self):
         super().__init__()
-        self.__note_id_counter = 1  # Приватний лічильник для унікальних ID нотаток
+        self.__note_id_counter = 1
+
+    def set_id_counter(self, max_id: int) -> None:
+        """
+        Встановлює значення лічильника ID.
+        Критично важливо викликати цей метод після завантаження даних з диска.
+        """
+        self.__note_id_counter = max_id + 1
 
     def add_note(self, text: str, tags: Optional[List[str]] = None) -> int:
         """Створює нотатку, зберігає її і повертає унікальний ID."""
@@ -43,19 +50,19 @@ class NoteBook(UserDict):
         return note_id
 
     def edit_note(self, note_id: int, new_text: str) -> None:
-        """Змінює текст існуючої нотатки за ID. Викидає ValueError, якщо ID не знайдено."""
+        """Змінює текст існуючої нотатки за ID."""
         if note_id not in self.data:
             raise ValueError(f"Нотатку з ID {note_id} не знайдено.")
         self.data[note_id].text = new_text
 
     def delete_note(self, note_id: int) -> None:
-        """Видаляє нотатку за ID. Викидає ValueError, якщо ID не знайдено."""
+        """Видаляє нотатку за ID."""
         if note_id not in self.data:
             raise ValueError(f"Нотатку з ID {note_id} не знайдено.")
         del self.data[note_id]
 
     def search_by_text(self, query: str) -> List[Tuple[int, Note]]:
-        """Шукає нотатки, що містять заданий текст. Повертає список пар (note_id, Note)."""
+        """Шукає нотатки за текстом."""
         query_lower = query.lower()
         return [
             (note_id, note) for note_id, note in self.data.items()
@@ -63,44 +70,11 @@ class NoteBook(UserDict):
         ]
 
     def search_by_tags(self, search_tags: List[str]) -> List[Tuple[int, Note]]:
-        """Шукає нотатки, які містять УСІ задані теги зі списку."""
-        search_tags_lower = [tag.lower() for tag in search_tags]
+        """Шукає нотатки, які містять УСІ задані теги."""
+        search_tags_set = {tag.lower() for tag in search_tags}
         result = []
         for note_id, note in self.data.items():
-            note_tags_lower = [t.lower() for t in note.tags]
-            if all(tag in note_tags_lower for tag in search_tags_lower):
+            note_tags_set = {t.lower() for t in note.tags}
+            if search_tags_set.issubset(note_tags_set):
                 result.append((note_id, note))
         return result
-
-
-if __name__ == "__main__":
-    # Базове тестування функціоналу
-    notebook = NoteBook()
-
-    id1 = notebook.add_note("Купити молоко та хліб", ["покупки", "їжа"])
-    id2 = notebook.add_note("Зателефонувати мамі ввечері", ["сім'я"])
-    id3 = notebook.add_note("Підготувати звіт для роботи", ["робота", "важливе"])
-
-    print("--- Всі нотатки ---")
-    for n_id, n in notebook.data.items():
-        print(f"ID {n_id}: {n}")
-
-    notebook.edit_note(id1, "Купити молоко, хліб та каву")
-    notebook.data[id1].add_tag("кава")
-    
-    print("\n--- Після редагування ID 1 ---")
-    print(f"ID {id1}: {notebook.data[id1]}")
-
-    print("\n--- Пошук за текстом 'робот' ---")
-    for n_id, n in notebook.search_by_text("робот"):
-        print(f"ID {n_id}: {n}")
-
-    print("\n--- Пошук за ДЕКІЛЬКОМА тегами ['робота', 'важливе'] ---")
-    for n_id, n in notebook.search_by_tags(["робота", "важливе"]):
-        print(f"ID {n_id}: {n}")
-
-    print("\n--- Спроба видалити неіснуючу нотатку ---")
-    try:
-        notebook.delete_note(99)
-    except ValueError as e:
-        print(f"Спіймано помилку: {e}")
