@@ -32,11 +32,10 @@ def parse_input(user_input: str) -> Tuple[str, list]:
 
 @input_error
 def add_contact(args: list, book: AddressBook) -> str:
-    """Додає новий контакт (тільки ім'я) і запускає меню редагування."""
     if not args:
         raise IndexError
         
-    name = " ".join(args)
+    name = args[0]
     record = book.find(name)
     is_new = False
     
@@ -44,6 +43,14 @@ def add_contact(args: list, book: AddressBook) -> str:
         record = Record(name)
         book.add_record(record)
         is_new = True
+
+    if len(args) == 2:
+        phone = args[1]
+        record.add_phone(phone)
+        if is_new:
+            return f"✅ Contact '{name}' created and phone {phone} added."
+        else:
+            return f"✅ Phone {phone} added to existing contact '{name}'."
 
     if is_new:
         print(f"✅ Contact '{name}' created! Let's add some details.")
@@ -148,10 +155,7 @@ def edit_contact(args: list, book: AddressBook) -> str:
                 print("✅ Address updated.")
                 
             elif choice == '5':
-                new_birthday = input("👉 Enter new birthday (DD.MM.YYYY): ").strip()
-                parsed_date = datetime.strptime(new_birthday, "%d.%m.%Y").date()
-                if parsed_date > datetime.today().date():
-                    raise ValueError("Birthday cannot be in the future.")
+                new_birthday = input("👉 Enter new birthday (e.g., 15.03.1990): ").strip()
                 record.add_birthday(new_birthday)
                 print("✅ Birthday updated.")
                 
@@ -238,15 +242,6 @@ def add_birthday(args: list, book: AddressBook) -> str:
     
     record = book.find(name)
     if record:
-        try:
-            parsed_date = datetime.strptime(birthday, "%d.%m.%Y").date()
-            if parsed_date > datetime.today().date():
-                raise ValueError("Birthday cannot be in the future.")
-        except ValueError as e:
-            if "future" in str(e):
-                raise ValueError("Birthday cannot be in the future.")
-            raise ValueError("Invalid date format. Please use DD.MM.YYYY.")
-            
         record.add_birthday(birthday)
         return "🎂 Birthday added."
     raise KeyError
