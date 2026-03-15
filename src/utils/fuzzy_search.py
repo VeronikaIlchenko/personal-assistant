@@ -4,16 +4,12 @@ from typing import List, Optional
 
 def suggest_command(user_input: str, available_commands: List[str]) -> Optional[str]:
     """
-    Аналізує введений користувачем текст і пропонує найбільш схожу команду.
-    
-    :param user_input: Рядок, який ввів користувач (наприклад, з опечаткою).
-    :param available_commands: Список доступних правильних команд.
-    :return: Найбільш схожа команда або None, якщо збігів не знайдено.
+    Analyzes the user's input and suggests the closest matching command.
     """
     if not user_input or not available_commands:
         return None
 
-    # Шукаємо 1 найближчий збіг із порогом схожості 60%
+    # Find the single closest match with a minimum similarity threshold of 60%
     matches = difflib.get_close_matches(
         word=user_input.lower(),
         possibilities=[cmd.lower() for cmd in available_commands],
@@ -23,6 +19,7 @@ def suggest_command(user_input: str, available_commands: List[str]) -> Optional[
 
     if matches:
         suggested_lower = matches[0]
+        # Return the original case-sensitive command from the available list
         for cmd in available_commands:
             if cmd.lower() == suggested_lower:
                 return cmd
@@ -31,25 +28,33 @@ def suggest_command(user_input: str, available_commands: List[str]) -> Optional[
 
 
 if __name__ == "__main__":
+    # Updated test registry matching the actual main.py commands
     COMMANDS = [
-        "add", "delete", "edit", "search", 
-        "show all", "help", "exit", "close",
-        "add-note", "delete-note"
+        "hello", "help", "add-contact", "show-contact", "all-contacts", 
+        "add-birthday", "show-birthdays", "add-email", "add-address", 
+        "search-contact", "edit-contact", "remove-field", "delete-contact",
+        "add-note", "search-notes", "search-tags", "show-notes", 
+        "edit-note", "delete-note", "close", "exit"
     ]
 
-    test_inputs = [
-        "ad",          # очікуємо 'add'
-        "delte",       # очікуємо 'delete'
-        "edti",        # очікуємо 'edit'
-        "shw al",      # очікуємо 'show all'
-        "asdfgh",      # очікуємо None (повна маячня)
-        "add-nto"      # очікуємо 'add-note'
-    ]
+    # Expanded test cases with realistic typos and expected outputs
+    test_inputs = {
+        "ad-contct": "add-contact",       # Missing letters
+        "shw-contact": "show-contact",    # Missing vowel
+        "al-contacts": "all-contacts",    # Missing double consonant
+        "add-bday": "add-birthday",       # Common abbreviation
+        "srch-tags": "search-tags",       # Dropped vowels
+        "remve-fild": "remove-field",     # Multiple typos
+        "hlp": "help",                    # Dropped vowel
+        "exi": "exit",                    # Incomplete word
+        "add contact": "add-contact",     # Missing hyphen
+        "show notes": "show-notes",       # Missing hyphen
+        "qwertyuiop": None,               # Complete gibberish (should return None)
+        "del-note": "delete-note"         # Abbreviated
+    }
 
-    print("--- Тестування Fuzzy Search ---")
-    for user_in in test_inputs:
+    print("--- Fuzzy Search Testing ---")
+    for user_in, expected in test_inputs.items():
         suggestion = suggest_command(user_in, COMMANDS)
-        if suggestion:
-            print(f"Введено: '{user_in}' -> Можливо, ви мали на увазі: '{suggestion}'?")
-        else:
-            print(f"Введено: '{user_in}' -> Збігів не знайдено.")
+        match_status = "✅ PASS" if suggestion == expected else f"❌ FAIL (Expected: {expected})"
+        print(f"[{match_status}] Input: '{user_in:<12}' -> Suggested: '{suggestion}'")

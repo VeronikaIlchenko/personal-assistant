@@ -1,6 +1,6 @@
-# 🌟 Personal Assistant CLI
+# 🌟 Pythonator3000 - Personal Assistant CLI
 
-Personal Assistant CLI is a powerful, interactive command-line tool designed to help you manage your contacts and notes with ease. Built with a focus on User Experience (UX), it features smart command recognition, robust data validation, and an adaptive interface.
+🤖 Pythonator3000: Command-line productivity made effortless. > It's simple yet deeply powerful, allowing you to manage your address book and notes with zero hustle. We designed this tool for users who value their time: execute quick commands to get things done instantly, and let our adaptive menus guide you only when making precise edits. No endless Q&A, no bloated interfaces — just smart fuzzy-search, strict data validation, and pure CLI efficiency.
 
 ## ✨ Key Features
 
@@ -69,24 +69,32 @@ The project follows a modular architecture for high maintainability:
 ## � Popular Commands
 
 | Command | Description |
-|---------|-------------|
-| `add-contact <name> [phone]` | Create a contact quickly, or just pass a name to open the interactive menu. |
-| `show-contact <name>` | Display all details for a specific contact |
-| `all-contacts` | View a formatted table of all contacts |
-| `show-birthdays [days]` | List contacts with upcoming birthdays |
-| `add-note [text]` | Create a new note with optional tags |
-| `edit-note <id>` | Modify text or tags for a specific note |
-| `show-notes` | View all notes in a clean, wrapped table |
-| `help` | View the full list of available commands |
+|---|---|
+| `add-contact <name>` | Add a new contact |
+| `show-contact <name>` | Show all details for a specific contact |
+| `all-contacts` | Show list of all contacts |
+| `search-contact <query>` | Search contacts by name or phone |
+| `edit-contact <name>` | ⚙️Interactive: Edit name, phone, email, etc. |
+| `remove-field <name>` | ⚙️Interactive: Remove specific fields |
+| `delete-contact <name>` | Delete the entire contact record |
+| `show-birthdays [days]` | Show upcoming birthdays (default: 7 days) |
+| `add-birthday <name> <date>` | Quick add: Birthday (DD.MM.YYYY) |
+| `add-note [text]` | ⚙️Interactive: Create a new note with tags |
+| `show-notes` | Show all notes |
+| `search-notes <query>` | Search notes by text |
+| `search-tags <tag1> [tag2...]` | Search notes by specific tags |
+| `edit-note <id>` | ⚙️Interactive: Edit text or tags |
+| `delete-note <id>` | Delete a specific note |
+| `help` | Show the help menu |
 | `exit` / `close` | Save data and quit |
 
 ## 👥 Team 
 
 This project was built collaboratively using Agile/Scrum methodologies:
 
-- **Veronika (Team Lead)**: Architecture, data persistence, and core logic
-- **Alisa (Developer)**: Address book models and data validation
-- **Yaroslav (Developer & Scrum Master)**: Note system, UX interface, packaging, and documentation
+- **Veronika Ilchenko (Team Lead)**: Architecture, data persistence, and core logic
+- **Alisa Skrypnyk (Developer)**: Address book models and data validation
+- **Yaroslav Ivanchenko (Developer & Scrum Master)**: Note system, UX interface, packaging, and documentation
 
 
 

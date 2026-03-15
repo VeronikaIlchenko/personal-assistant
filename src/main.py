@@ -3,6 +3,7 @@ import textwrap
 from datetime import datetime
 from typing import Tuple
 
+# Enables arrow-key navigation in the terminal if supported by the OS
 try:
     import readline
 except ImportError:
@@ -12,9 +13,9 @@ from storage import load_data, save_data
 from models.address_book import AddressBook, Record
 from models.notes import NoteBook
 from utils.fuzzy_search import suggest_command
-from utils.handlers import input_error  # Декоратор імпортується з вашого файлу
+from utils.handlers import input_error
 
-# Оновлений і логічний список команд
+# Registry of all available CLI commands
 COMMANDS = [
     "hello", "help", "add-contact", "show-contact", "all-contacts", 
     "add-birthday", "show-birthdays", "add-email", "add-address", 
@@ -24,7 +25,7 @@ COMMANDS = [
 ]
 
 def parse_input(user_input: str) -> Tuple[str, list]:
-    """Парсить введення користувача на команду та аргументи."""
+    # Parses raw user input into a standardized command string and a list of arguments
     if not user_input.strip():
         return "", []
     cmd, *args = user_input.split()
@@ -32,6 +33,7 @@ def parse_input(user_input: str) -> Tuple[str, list]:
 
 @input_error
 def add_contact(args: list, book: AddressBook) -> str:
+    # Adds a new contact or triggers the interactive setup if no phone is provided
     if not args:
         raise IndexError
         
@@ -61,7 +63,7 @@ def add_contact(args: list, book: AddressBook) -> str:
 
 @input_error
 def show_contact(args: list, book: AddressBook) -> str:
-    """Показує всі дані одного контакту."""
+    # Displays all stored details for a specific contact
     if not args:
         raise IndexError
     name = " ".join(args)
@@ -72,6 +74,7 @@ def show_contact(args: list, book: AddressBook) -> str:
 
 @input_error
 def search_contact(args: list, book: AddressBook) -> str:
+    # Searches for contacts by matching the query against names and phone numbers
     if not args:
         raise IndexError
     query = args[0]
@@ -86,7 +89,7 @@ def search_contact(args: list, book: AddressBook) -> str:
 
 @input_error
 def edit_contact(args: list, book: AddressBook) -> str:
-    """Інтерактивне меню редагування контакту."""
+    # Interactive CLI wizard to modify existing contact fields
     if not args:
         raise IndexError
     name = " ".join(args)
@@ -167,7 +170,7 @@ def edit_contact(args: list, book: AddressBook) -> str:
 
 @input_error
 def remove_field(args: list, book: AddressBook) -> str:
-    """Інтерактивне меню видалення полів контакту."""
+    # Interactive CLI wizard to selectively delete fields from a contact
     if not args:
         raise IndexError
     name = " ".join(args)
@@ -225,6 +228,7 @@ def remove_field(args: list, book: AddressBook) -> str:
 
 @input_error
 def delete_contact(args: list, book: AddressBook) -> str:
+    # Permanently removes a contact from the address book
     if not args:
         raise IndexError
     name = " ".join(args)
@@ -235,6 +239,7 @@ def delete_contact(args: list, book: AddressBook) -> str:
 
 @input_error
 def add_birthday(args: list, book: AddressBook) -> str:
+    # Appends a birthday to an existing contact
     if len(args) < 2:
         raise IndexError
     birthday = args[-1]
@@ -248,6 +253,7 @@ def add_birthday(args: list, book: AddressBook) -> str:
 
 @input_error
 def add_email(args: list, book: AddressBook) -> str:
+    # Appends an email address to an existing contact
     if len(args) < 2:
         raise IndexError
     email = args[-1]
@@ -261,6 +267,7 @@ def add_email(args: list, book: AddressBook) -> str:
 
 @input_error
 def add_address(args: list, book: AddressBook) -> str:
+    # Appends a physical address to an existing contact
     if len(args) < 2:
         raise IndexError
     name = args[0]
@@ -273,6 +280,7 @@ def add_address(args: list, book: AddressBook) -> str:
 
 @input_error
 def show_birthdays(args: list, book: AddressBook) -> str:
+    # Returns a list of contacts with birthdays within the specified timeframe (default 7 days)
     days = int(args[0]) if args else 7
     birthdays = book.get_birthdays_per_range(days)
     if not birthdays:
@@ -282,6 +290,7 @@ def show_birthdays(args: list, book: AddressBook) -> str:
 
 @input_error
 def add_note(args: list, notes: NoteBook) -> str:
+    # Creates a new note, either inline or via interactive prompts
     if args:
         text = " ".join(args)
     else:
@@ -297,6 +306,7 @@ def add_note(args: list, notes: NoteBook) -> str:
 
 @input_error
 def search_notes(args: list, notes: NoteBook) -> str:
+    # Searches the notebook by note text content
     if not args:
         raise IndexError
     query = " ".join(args)
@@ -307,6 +317,7 @@ def search_notes(args: list, notes: NoteBook) -> str:
 
 @input_error
 def search_tags(args: list, notes: NoteBook) -> str:
+    # Searches the notebook for specific tags
     if not args:
         raise IndexError
     results = notes.search_by_tags(args)
@@ -316,7 +327,7 @@ def search_tags(args: list, notes: NoteBook) -> str:
 
 @input_error
 def edit_note(args: list, notes: NoteBook) -> str:
-    """Інтерактивне меню редагування нотатки."""
+    # Interactive CLI wizard to modify existing note text or tags
     if not args:
         raise IndexError
         
@@ -371,7 +382,7 @@ def edit_note(args: list, notes: NoteBook) -> str:
 
 @input_error
 def delete_note(args: list, notes: NoteBook) -> str:
-    """Видаляє нотатку за ID."""
+    # Permanently removes a note by its ID
     if not args:
         raise IndexError
         
@@ -386,6 +397,7 @@ def delete_note(args: list, notes: NoteBook) -> str:
     raise KeyError
 
 def show_help() -> str:
+    # Returns the formatted help menu string
     return """
 🌟 Here is what I can do for you:
 
@@ -418,18 +430,18 @@ def show_help() -> str:
 """
 
 def main():
-    # Завантажуємо дані
+    # Initialize storage and fix note ID counters upon startup
     book = load_data("addressbook.pkl", AddressBook)
     notes = load_data("notes.pkl", NoteBook)
     
-    # Виправлення багу з ID нотаток
     if notes.data:
         max_id = max(notes.data.keys())
         notes.set_id_counter(max_id)
     
-    print("\n🌟 Welcome to Personal Assistant CLI (Experimental Edition)!")
+    print("\n🤖 Welcome to Pythonator3000 - Personal Assistant CLI!")
     print(show_help())
     
+    # Main CLI execution loop
     while True:
         try:
             user_input = input("\n🔹 Enter command: ").strip()
@@ -438,11 +450,10 @@ def main():
                 
             command, args = parse_input(user_input)
 
-            # --- SMART UX FIX: Обробка пробілів замість дефісів ---
+            # Smart UX routing: Handle multi-word commands (e.g., "all contacts" -> "all-contacts")
             if args and f"{command}-{args[0]}" in COMMANDS:
                 command = f"{command}-{args[0]}"
-                args = args[1:] # Видаляємо перше слово з аргументів
-            # --------------------------------------------------------
+                args = args[1:]
 
             if command in ["close", "exit"]:
                 save_data(book, "addressbook.pkl")
@@ -481,6 +492,7 @@ def main():
                 print(add_address(args, book))
                 
             elif command == "all-contacts":
+                # Render formatted ASCII table for contacts with dynamic text wrapping
                 if not book.data:
                     print("📭 Address book is empty.")
                 else:
@@ -541,6 +553,7 @@ def main():
                 print(search_tags(args, notes))
                 
             elif command == "show-notes":
+                # Render formatted ASCII table for notes with dynamic text wrapping
                 if not notes.data:
                     print("🗒️ NoteBook is empty.")
                 else:
@@ -568,10 +581,8 @@ def main():
                         print("-" * 80)
 
             else:
-                # --- ПОКРАЩЕНИЙ FUZZY SEARCH ---
-                # З'єднуємо перші два слова дефісом для перевірки (наприклад, "al contacts")
+                # Fallback: Suggest a similar command using fuzzy matching if the user makes a typo
                 potential_cmd = f"{command}-{args[0]}" if args else command
-                
                 suggestion = suggest_command(potential_cmd, COMMANDS) or suggest_command(command, COMMANDS)
                 
                 if suggestion:
@@ -580,6 +591,7 @@ def main():
                     print("❓ Unknown command. Type 'help' to see available commands or 'exit' to quit.")
                 
         except KeyboardInterrupt:
+            # Handles unexpected exits (Ctrl+C) securely by saving the data
             save_data(book, "addressbook.pkl")
             save_data(notes, "notes.pkl")
             print("\n⚠️ Forced shutdown. Data saved safely.")

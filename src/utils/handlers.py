@@ -1,10 +1,10 @@
 def input_error(func):
-    """Декоратор для перехоплення типових помилок введення та виводу підказок."""
+    """Decorator to catch common input errors and provide context-specific CLI hints."""
     def inner(*args, **kwargs):
         try:
             return func(*args, **kwargs)
         except ValueError as e:
-            # Оновлені підказки відповідно до нового UX
+            # Provide specific hints for data validation errors (e.g., wrong phone format)
             hints = {
                 "add_contact": "👉 Format: add-contact <name>",
                 "add_birthday": "👉 Format: add-birthday <name> <DD.MM.YYYY>",
@@ -15,10 +15,11 @@ def input_error(func):
             return f"❌ Data error: {e}\n{hint}"
             
         except KeyError:
+            # Triggered when searching for a non-existent contact or note ID
             return "❌ Error: Contact or Note not found."
             
         except IndexError:
-            # Оновлені підказки для відсутніх аргументів
+            # Provide specific hints when required arguments are missing
             hints = {
                 "add_contact": "👉 Format: add-contact <name>",
                 "add_email": "👉 Format: add-email <name> <email>",
@@ -26,7 +27,7 @@ def input_error(func):
                 "search_contact": "👉 Format: search-contact <query>"
             }
             
-            # Якщо функція працює тільки з ім'ям, генеруємо підказку автоматично
+            # Auto-generate hints for commands that require exactly one 'name' argument
             if func.__name__ in ["show_contact", "delete_contact", "edit_contact", "remove_field"]:
                 hint = f"👉 Format: {func.__name__.replace('_', '-')} <name>"
             else:
